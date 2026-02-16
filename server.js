@@ -22,9 +22,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
 
 app.use(cors());
+app.use(express.static(__dirname));
 
 // Health check
-app.get('/', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Acknowledgement receiver is running.' });
 });
 
@@ -60,5 +61,6 @@ app.listen(PORT, () => {
   console.log(`\n📋 Acknowledgement Receiver`);
   console.log(`   Listening on port ${PORT}`);
   console.log(`   Saving to: ${OUTPUT_DIR}`);
+  console.log(`   Web app: http://localhost:${PORT}`);
   console.log(`   POST endpoint: http://localhost:${PORT}/upload\n`);
 });
