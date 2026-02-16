@@ -223,35 +223,127 @@
     text-decoration: underline;
   }
 
-  /* ── Signature Modal (Fullscreen) ── */
+  /* ── Signature Modal (Fullscreen, landscape-optimized) ── */
   .sig-modal {
     display: none;
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: var(--white);
+    background: #F5F5F0;
     flex-direction: column;
   }
   .sig-modal.open {
     display: flex;
   }
-  .sig-modal-header {
+
+  /* Rotate hint — shown in portrait, hidden in landscape */
+  .sig-rotate-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+  .sig-rotate-hint .rotate-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--navy);
+    animation: rotateNudge 2s ease-in-out infinite;
+  }
+  .sig-rotate-hint .rotate-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+  .sig-rotate-hint .rotate-sub {
+    font-size: 14px;
+    color: var(--gray-600);
+  }
+  .sig-rotate-hint .btn-sign-anyway {
+    margin-top: 12px;
+    padding: 10px 24px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--gray-600);
+    background: none;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  @keyframes rotateNudge {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    75% { transform: rotate(15deg); }
+  }
+
+  /* Signing area — hidden in portrait, shown in landscape (or forced) */
+  .sig-signing-area {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  .sig-signing-area.force-show {
+    display: flex;
+  }
+
+  .sig-modal-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 8px 16px;
     background: var(--navy);
     color: var(--white);
     flex-shrink: 0;
   }
-  .sig-modal-title {
-    font-size: 16px;
+  .sig-modal-bar-title {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+  .sig-modal-bar-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .sig-modal-bar-actions button {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-bar-cancel {
+    background: rgba(255,255,255,0.15);
+    color: var(--white);
+  }
+  .btn-bar-clear {
+    background: rgba(255,255,255,0.25);
+    color: var(--white);
+  }
+  .btn-bar-accept {
+    background: var(--white);
+    color: var(--navy);
     font-weight: 700;
   }
-  .sig-modal-canvas-wrap {
+  .btn-bar-accept:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .sig-canvas-area {
     flex: 1;
     position: relative;
     overflow: hidden;
+    background: var(--white);
+    margin: 10px;
+    border-radius: 8px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
   }
   #sig-modal-canvas {
     width: 100%;
@@ -259,58 +351,44 @@
     display: block;
     touch-action: none;
   }
-  .sig-modal-line {
+  .sig-guide-line {
     position: absolute;
-    bottom: 60px;
-    left: 24px;
-    right: 24px;
+    bottom: 28%;
+    left: 32px;
+    right: 32px;
     height: 1px;
-    background: var(--gray-200);
+    background: var(--gray-300);
     pointer-events: none;
   }
-  .sig-modal-x {
+  .sig-guide-x {
     position: absolute;
-    bottom: 50px;
-    left: 24px;
-    font-size: 18px;
+    bottom: calc(28% - 6px);
+    left: 32px;
+    font-size: 16px;
     color: var(--gray-300);
     pointer-events: none;
-    font-style: italic;
+    font-weight: 300;
+    letter-spacing: 1px;
   }
-  .sig-modal-footer {
-    display: flex;
-    gap: 12px;
-    padding: 12px 16px;
-    background: var(--gray-50);
-    border-top: 1px solid var(--gray-200);
-    flex-shrink: 0;
+  .sig-guide-label {
+    position: absolute;
+    bottom: calc(28% + 6px);
+    right: 32px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-400);
+    pointer-events: none;
   }
-  .sig-modal-footer button {
-    flex: 1;
-    padding: 14px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: var(--font-body);
-    border-radius: 6px;
-    cursor: pointer;
-    border: none;
+
+  /* Landscape media query */
+  @media (orientation: landscape) {
+    .sig-rotate-hint { display: none; }
+    .sig-signing-area { display: flex; }
   }
-  .btn-sig-cancel {
-    background: var(--gray-200);
-    color: var(--gray-800);
-  }
-  .btn-sig-clear {
-    background: var(--white);
-    color: var(--gray-600);
-    border: 1px solid var(--gray-300) !important;
-  }
-  .btn-sig-accept {
-    background: var(--navy);
-    color: var(--white);
-  }
-  .btn-sig-accept:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+  @media (orientation: portrait) {
+    .sig-rotate-hint { display: flex; }
+    .sig-signing-area:not(.force-show) { display: none; }
   }
 
   /* ── Submit Button ── */
@@ -520,18 +598,34 @@
 
   <!-- Signature Modal -->
   <div class="sig-modal" id="sigModal">
-    <div class="sig-modal-header">
-      <span class="sig-modal-title">Draw Your Signature</span>
+    <!-- Portrait: rotate hint -->
+    <div class="sig-rotate-hint" id="sigRotateHint">
+      <svg class="rotate-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="2" width="16" height="20" rx="2"/>
+        <path d="M12 18h.01"/>
+        <path d="M2 12l2-2 2 2"/>
+      </svg>
+      <div class="rotate-text">Rotate your device to landscape</div>
+      <div class="rotate-sub">This gives you the best signing area</div>
+      <button type="button" class="btn-sign-anyway" id="btnSignAnyway">Sign in portrait anyway</button>
     </div>
-    <div class="sig-modal-canvas-wrap">
-      <canvas id="sig-modal-canvas"></canvas>
-      <div class="sig-modal-line"></div>
-      <div class="sig-modal-x">&#10005;</div>
-    </div>
-    <div class="sig-modal-footer">
-      <button type="button" class="btn-sig-cancel" id="btnSigCancel">Cancel</button>
-      <button type="button" class="btn-sig-clear" id="btnSigClear">Clear</button>
-      <button type="button" class="btn-sig-accept" id="btnSigAccept" disabled>Accept</button>
+
+    <!-- Landscape (or forced): signing interface -->
+    <div class="sig-signing-area" id="sigSigningArea">
+      <div class="sig-modal-bar">
+        <span class="sig-modal-bar-title">Sign below</span>
+        <div class="sig-modal-bar-actions">
+          <button type="button" class="btn-bar-cancel" id="btnSigCancel">Cancel</button>
+          <button type="button" class="btn-bar-clear" id="btnSigClear">Clear</button>
+          <button type="button" class="btn-bar-accept" id="btnSigAccept" disabled>Accept</button>
+        </div>
+      </div>
+      <div class="sig-canvas-area">
+        <canvas id="sig-modal-canvas"></canvas>
+        <div class="sig-guide-line"></div>
+        <div class="sig-guide-x">&#10005;</div>
+        <div class="sig-guide-label">Sign here</div>
+      </div>
     </div>
   </div>
 
@@ -602,6 +696,8 @@ const sigLockedActions = document.getElementById('sigLockedActions');
 const btnResign = document.getElementById('btnResign');
 const sigModal = document.getElementById('sigModal');
 const sigModalCanvas = document.getElementById('sig-modal-canvas');
+const sigSigningArea = document.getElementById('sigSigningArea');
+const btnSignAnyway = document.getElementById('btnSignAnyway');
 const btnSigCancel = document.getElementById('btnSigCancel');
 const btnSigClear = document.getElementById('btnSigClear');
 const btnSigAccept = document.getElementById('btnSigAccept');
@@ -628,6 +724,7 @@ let modalSignaturePad = null;
 function initModalCanvas() {
   const ratio = Math.max(window.devicePixelRatio || 1, 1);
   const rect = sigModalCanvas.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return; // not visible yet
   sigModalCanvas.width = rect.width * ratio;
   sigModalCanvas.height = rect.height * ratio;
   sigModalCanvas.getContext('2d').scale(ratio, ratio);
@@ -636,6 +733,7 @@ function initModalCanvas() {
 
 function openSignModal() {
   sigModal.classList.add('open');
+  sigSigningArea.classList.remove('force-show');
   document.body.style.overflow = 'hidden';
 
   if (!modalSignaturePad) {
@@ -650,15 +748,38 @@ function openSignModal() {
     });
   }
 
-  // Small delay to let modal render, then size canvas
-  setTimeout(initModalCanvas, 50);
+  // If already landscape, init canvas immediately
+  if (window.innerWidth > window.innerHeight) {
+    setTimeout(initModalCanvas, 80);
+  }
   btnSigAccept.disabled = true;
 }
 
+// Re-init canvas when orientation changes while modal is open
+window.addEventListener('resize', () => {
+  if (sigModal.classList.contains('open') && sigSigningArea.offsetParent !== null) {
+    setTimeout(initModalCanvas, 100);
+  }
+});
+
+// Also listen for orientation change
+screen.orientation?.addEventListener('change', () => {
+  if (sigModal.classList.contains('open')) {
+    setTimeout(initModalCanvas, 150);
+  }
+});
+
 function closeSignModal() {
   sigModal.classList.remove('open');
+  sigSigningArea.classList.remove('force-show');
   document.body.style.overflow = '';
 }
+
+// "Sign in portrait anyway" button
+btnSignAnyway.addEventListener('click', () => {
+  sigSigningArea.classList.add('force-show');
+  setTimeout(initModalCanvas, 80);
+});
 
 // Open modal on tap
 sigPreview.addEventListener('click', () => {
