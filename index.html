@@ -163,60 +163,155 @@
     color: var(--gray-600);
   }
 
-  /* ── Signature Pad ── */
-  .sig-wrapper {
+  /* ── Signature Area (Locked Preview) ── */
+  .sig-preview {
     position: relative;
     border: 1.5px solid var(--gray-300);
     border-radius: 6px;
     background: var(--white);
     overflow: hidden;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
   }
-  .sig-wrapper.active {
-    border-color: var(--navy);
-    box-shadow: 0 0 0 3px rgba(27,42,74,0.1);
+  .sig-preview.has-sig {
+    cursor: default;
+    border-color: var(--green);
+    background: var(--green-light);
   }
-  #sig-canvas {
-    width: 100%;
-    height: 160px;
+  .sig-preview img {
+    max-width: 100%;
+    max-height: 80px;
     display: block;
-    touch-action: none;
+    padding: 8px;
   }
-  .sig-line {
-    position: absolute;
-    bottom: 40px;
-    left: 16px;
-    right: 16px;
-    height: 1px;
-    background: var(--gray-200);
-    pointer-events: none;
+  .sig-tap-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--gray-400);
+    padding: 16px;
   }
-  .sig-x {
-    position: absolute;
-    bottom: 34px;
-    left: 16px;
+  .sig-tap-prompt svg {
+    width: 28px;
+    height: 28px;
+    opacity: 0.5;
+  }
+  .sig-tap-prompt span {
     font-size: 14px;
-    color: var(--gray-300);
-    pointer-events: none;
-    font-style: italic;
+    font-weight: 500;
   }
-  .sig-actions {
+  .sig-locked-actions {
     display: flex;
     justify-content: flex-end;
     padding: 6px 8px;
     background: var(--gray-50);
     border-top: 1px solid var(--gray-200);
   }
-  .btn-clear {
+  .btn-resign {
     background: none;
-    border: 1px solid var(--gray-300);
-    border-radius: 4px;
-    padding: 6px 14px;
-    font-size: 12px;
-    color: var(--gray-600);
-    cursor: pointer;
+    border: none;
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 600;
     font-family: var(--font-body);
+    cursor: pointer;
+    padding: 4px 8px;
+    text-decoration: underline;
   }
-  .btn-clear:active { background: var(--gray-100); }
+
+  /* ── Signature Modal (Fullscreen) ── */
+  .sig-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--white);
+    flex-direction: column;
+  }
+  .sig-modal.open {
+    display: flex;
+  }
+  .sig-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--navy);
+    color: var(--white);
+    flex-shrink: 0;
+  }
+  .sig-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .sig-modal-canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  #sig-modal-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+  }
+  .sig-modal-line {
+    position: absolute;
+    bottom: 60px;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: var(--gray-200);
+    pointer-events: none;
+  }
+  .sig-modal-x {
+    position: absolute;
+    bottom: 50px;
+    left: 24px;
+    font-size: 18px;
+    color: var(--gray-300);
+    pointer-events: none;
+    font-style: italic;
+  }
+  .sig-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+    flex-shrink: 0;
+  }
+  .sig-modal-footer button {
+    flex: 1;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-sig-cancel {
+    background: var(--gray-200);
+    color: var(--gray-800);
+  }
+  .btn-sig-clear {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300) !important;
+  }
+  .btn-sig-accept {
+    background: var(--navy);
+    color: var(--white);
+  }
+  .btn-sig-accept:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 
   /* ── Submit Button ── */
   .btn-submit {
@@ -410,14 +505,33 @@
   <div class="card">
     <div class="card-body">
       <label class="field-label">Teammate Signature</label>
-      <div class="sig-wrapper" id="sigWrapper">
-        <canvas id="sig-canvas"></canvas>
-        <div class="sig-line"></div>
-        <div class="sig-x">✕</div>
-        <div class="sig-actions">
-          <button type="button" class="btn-clear" id="btnClear">Clear</button>
+      <div class="sig-preview" id="sigPreview">
+        <div class="sig-tap-prompt" id="sigPrompt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          <span>Tap to Sign</span>
         </div>
+        <img id="sigPreviewImg" style="display:none;" alt="Signature">
       </div>
+      <div class="sig-locked-actions" id="sigLockedActions" style="display:none;">
+        <button type="button" class="btn-resign" id="btnResign">Re-sign</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signature Modal -->
+  <div class="sig-modal" id="sigModal">
+    <div class="sig-modal-header">
+      <span class="sig-modal-title">Draw Your Signature</span>
+    </div>
+    <div class="sig-modal-canvas-wrap">
+      <canvas id="sig-modal-canvas"></canvas>
+      <div class="sig-modal-line"></div>
+      <div class="sig-modal-x">&#10005;</div>
+    </div>
+    <div class="sig-modal-footer">
+      <button type="button" class="btn-sig-cancel" id="btnSigCancel">Cancel</button>
+      <button type="button" class="btn-sig-clear" id="btnSigClear">Clear</button>
+      <button type="button" class="btn-sig-accept" id="btnSigAccept" disabled>Accept</button>
     </div>
   </div>
 
@@ -471,9 +585,6 @@ const successDetail = document.getElementById('successDetail');
 const consentCheck = document.getElementById('consentCheck');
 const teammateName = document.getElementById('teammateName');
 const signDate = document.getElementById('signDate');
-const sigCanvas = document.getElementById('sig-canvas');
-const sigWrapper = document.getElementById('sigWrapper');
-const btnClear = document.getElementById('btnClear');
 const btnSubmit = document.getElementById('btnSubmit');
 const btnReset = document.getElementById('btnReset');
 const toast = document.getElementById('toast');
@@ -482,6 +593,23 @@ const ackScroll = document.getElementById('ackScroll');
 const configToggle = document.getElementById('configToggle');
 const configPanel = document.getElementById('configPanel');
 const localServerUrl = document.getElementById('localServerUrl');
+
+// Signature modal refs
+const sigPreview = document.getElementById('sigPreview');
+const sigPrompt = document.getElementById('sigPrompt');
+const sigPreviewImg = document.getElementById('sigPreviewImg');
+const sigLockedActions = document.getElementById('sigLockedActions');
+const btnResign = document.getElementById('btnResign');
+const sigModal = document.getElementById('sigModal');
+const sigModalCanvas = document.getElementById('sig-modal-canvas');
+const btnSigCancel = document.getElementById('btnSigCancel');
+const btnSigClear = document.getElementById('btnSigClear');
+const btnSigAccept = document.getElementById('btnSigAccept');
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let capturedSignatureDataUrl = null;
 
 // ═══════════════════════════════════════════════
 // INIT
@@ -494,32 +622,86 @@ const dateStr = String(today.getMonth()+1).padStart(2,'0') + '/' +
                 today.getFullYear();
 signDate.value = dateStr;
 
-// Signature Pad
-const signaturePad = new SignaturePad(sigCanvas, {
-  backgroundColor: 'rgb(255,255,255)',
-  penColor: '#1B2A4A',
-  minWidth: 1.5,
-  maxWidth: 3,
+// Modal Signature Pad
+let modalSignaturePad = null;
+
+function initModalCanvas() {
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  const rect = sigModalCanvas.getBoundingClientRect();
+  sigModalCanvas.width = rect.width * ratio;
+  sigModalCanvas.height = rect.height * ratio;
+  sigModalCanvas.getContext('2d').scale(ratio, ratio);
+  if (modalSignaturePad) modalSignaturePad.clear();
+}
+
+function openSignModal() {
+  sigModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  if (!modalSignaturePad) {
+    modalSignaturePad = new SignaturePad(sigModalCanvas, {
+      backgroundColor: 'rgb(255,255,255)',
+      penColor: '#1B2A4A',
+      minWidth: 1.5,
+      maxWidth: 3.5,
+    });
+    modalSignaturePad.addEventListener('endStroke', () => {
+      btnSigAccept.disabled = modalSignaturePad.isEmpty();
+    });
+  }
+
+  // Small delay to let modal render, then size canvas
+  setTimeout(initModalCanvas, 50);
+  btnSigAccept.disabled = true;
+}
+
+function closeSignModal() {
+  sigModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Open modal on tap
+sigPreview.addEventListener('click', () => {
+  if (capturedSignatureDataUrl) return; // locked
+  openSignModal();
 });
 
-function resizeCanvas() {
-  const ratio = Math.max(window.devicePixelRatio || 1, 1);
-  const rect = sigCanvas.getBoundingClientRect();
-  sigCanvas.width = rect.width * ratio;
-  sigCanvas.height = rect.height * ratio;
-  sigCanvas.getContext('2d').scale(ratio, ratio);
-  signaturePad.clear();
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+// Re-sign button
+btnResign.addEventListener('click', () => {
+  capturedSignatureDataUrl = null;
+  sigPreviewImg.style.display = 'none';
+  sigPrompt.style.display = '';
+  sigPreview.classList.remove('has-sig');
+  sigLockedActions.style.display = 'none';
+  validateForm();
+  openSignModal();
+});
 
-// Signature pad focus styling
-sigCanvas.addEventListener('pointerdown', () => sigWrapper.classList.add('active'));
-sigCanvas.addEventListener('pointerup', () => sigWrapper.classList.remove('active'));
+// Cancel
+btnSigCancel.addEventListener('click', closeSignModal);
 
-// Clear button
-btnClear.addEventListener('click', () => {
-  signaturePad.clear();
+// Clear
+btnSigClear.addEventListener('click', () => {
+  if (modalSignaturePad) {
+    modalSignaturePad.clear();
+    btnSigAccept.disabled = true;
+  }
+});
+
+// Accept
+btnSigAccept.addEventListener('click', () => {
+  if (!modalSignaturePad || modalSignaturePad.isEmpty()) return;
+
+  capturedSignatureDataUrl = modalSignaturePad.toDataURL('image/png');
+
+  // Show preview
+  sigPreviewImg.src = capturedSignatureDataUrl;
+  sigPreviewImg.style.display = 'block';
+  sigPrompt.style.display = 'none';
+  sigPreview.classList.add('has-sig');
+  sigLockedActions.style.display = '';
+
+  closeSignModal();
   validateForm();
 });
 
@@ -549,14 +731,13 @@ localServerUrl.addEventListener('input', () => {
 function validateForm() {
   const valid = consentCheck.checked &&
                 teammateName.value.trim().length > 0 &&
-                !signaturePad.isEmpty();
+                capturedSignatureDataUrl !== null;
   btnSubmit.disabled = !valid;
   return valid;
 }
 
 consentCheck.addEventListener('change', validateForm);
 teammateName.addEventListener('input', validateForm);
-sigCanvas.addEventListener('pointerup', () => setTimeout(validateForm, 50));
 
 // ═══════════════════════════════════════════════
 // PDF GENERATION (fill blank template)
@@ -699,7 +880,7 @@ btnSubmit.addEventListener('click', async () => {
   try {
     const fullName = teammateName.value.trim();
     const date = signDate.value;
-    const sigDataUrl = signaturePad.toDataURL('image/png');
+    const sigDataUrl = capturedSignatureDataUrl;
     const filename = buildFilename(fullName, date);
 
     // Generate PDF
@@ -737,7 +918,12 @@ btnReset.addEventListener('click', () => {
   formArea.classList.remove('hidden');
   consentCheck.checked = false;
   teammateName.value = '';
-  signaturePad.clear();
+  capturedSignatureDataUrl = null;
+  sigPreviewImg.style.display = 'none';
+  sigPrompt.style.display = '';
+  sigPreview.classList.remove('has-sig');
+  sigLockedActions.style.display = 'none';
+  if (modalSignaturePad) modalSignaturePad.clear();
   scrollHint.style.display = '';
   btnSubmit.classList.remove('loading');
   btnSubmit.disabled = true;
