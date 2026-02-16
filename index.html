@@ -391,6 +391,44 @@
     .sig-signing-area:not(.force-show) { display: none; }
   }
 
+  /* ── Rotate Back Overlay ── */
+  .rotate-back-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background: rgba(27, 42, 74, 0.92);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+  .rotate-back-overlay.show {
+    display: flex;
+  }
+  .rotate-back-overlay .rotate-back-icon {
+    width: 56px;
+    height: 56px;
+    color: var(--white);
+    animation: rotateBack 1.5s ease-in-out infinite;
+  }
+  .rotate-back-overlay .rotate-back-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .rotate-back-overlay .rotate-back-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+  }
+  @keyframes rotateBack {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    75% { transform: rotate(-15deg); }
+  }
+
   /* ── Submit Button ── */
   .btn-submit {
     width: 100%;
@@ -664,6 +702,17 @@
   <button class="btn-reset" id="btnReset">Sign Another</button>
 </div>
 
+<!-- Rotate Back Overlay -->
+<div class="rotate-back-overlay" id="rotateBackOverlay">
+  <svg class="rotate-back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="2" width="16" height="20" rx="2"/>
+    <path d="M12 18h.01"/>
+    <path d="M2 12l2-2 2 2"/>
+  </svg>
+  <div class="rotate-back-text">Rotate back to portrait</div>
+  <div class="rotate-back-sub">Turn your device upright to continue</div>
+</div>
+
 <!-- Error Toast -->
 <div class="toast" id="toast"></div>
 
@@ -706,6 +755,7 @@ const btnSigAccept = document.getElementById('btnSigAccept');
 // STATE
 // ═══════════════════════════════════════════════
 let capturedSignatureDataUrl = null;
+let enteredModalInPortrait = false;
 
 // ═══════════════════════════════════════════════
 // INIT
@@ -732,6 +782,7 @@ function initModalCanvas() {
 }
 
 function openSignModal() {
+  enteredModalInPortrait = window.innerHeight > window.innerWidth;
   sigModal.classList.add('open');
   sigSigningArea.classList.remove('force-show');
   document.body.style.overflow = 'hidden';
@@ -824,6 +875,27 @@ btnSigAccept.addEventListener('click', () => {
 
   closeSignModal();
   validateForm();
+
+  // If they entered in portrait and are now in landscape, show rotate-back hint
+  const rotateBackOverlay = document.getElementById('rotateBackOverlay');
+  if (enteredModalInPortrait && window.innerWidth > window.innerHeight) {
+    rotateBackOverlay.classList.add('show');
+
+    // Auto-dismiss when they rotate back to portrait
+    function checkPortrait() {
+      if (window.innerHeight > window.innerWidth) {
+        rotateBackOverlay.classList.remove('show');
+        window.removeEventListener('resize', checkPortrait);
+      }
+    }
+    window.addEventListener('resize', checkPortrait);
+
+    // Also dismiss on tap as a fallback
+    rotateBackOverlay.addEventListener('click', () => {
+      rotateBackOverlay.classList.remove('show');
+      window.removeEventListener('resize', checkPortrait);
+    }, { once: true });
+  }
 });
 
 // Scroll hint
