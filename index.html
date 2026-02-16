@@ -559,128 +559,68 @@ teammateName.addEventListener('input', validateForm);
 sigCanvas.addEventListener('pointerup', () => setTimeout(validateForm, 50));
 
 // ═══════════════════════════════════════════════
-// PDF GENERATION
+// PDF GENERATION (fill blank template)
 // ═══════════════════════════════════════════════
 async function generatePDF(name, sigDataUrl, date) {
-  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const { PDFDocument, rgb } = PDFLib;
 
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([612, 792]); // US Letter
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const fontSize = 9.5;
-  const lineHeight = 13;
-  const margin = 60;
-  const contentWidth = 612 - margin * 2;
-  let y = 740;
+  // Fetch the blank template from the same repo
+  const templateUrl = new URL('blank_color_acknowledgement.pdf', window.location.href).href;
+  const templateBytes = await fetch(templateUrl).then(r => r.arrayBuffer());
 
-  const navy = rgb(0.106, 0.165, 0.290);
-  const black = rgb(0, 0, 0);
-  const gray = rgb(0.4, 0.4, 0.4);
+  const pdfDoc = await PDFDocument.load(templateBytes);
+  const form = pdfDoc.getForm();
+  const page = pdfDoc.getPage(0);
+  const pageHeight = page.getHeight();
 
-  // Header background
-  page.drawRectangle({ x: 0, y: 742, width: 612, height: 50, color: navy });
-  page.drawText('ADV Teammate Handbook', { x: margin, y: 762, size: 14, font: fontBold, color: rgb(1,1,1) });
-  page.drawText('Acknowledgement of Receipt  |  Revised February 2025', { x: margin, y: 750, size: 8, font, color: rgb(0.75,0.75,0.75) });
+  // Fill checkbox
+  try {
+    const checkbox = form.getCheckBox('acknowledge_checkbox');
+    checkbox.check();
+  } catch (e) { console.warn('Checkbox field not found:', e); }
 
-  // Title
-  y = 720;
-  page.drawText('Acknowledgement of Receipt', { x: margin, y, size: 14, font: fontBold, color: navy });
-  y -= 6;
-  page.drawLine({ start: { x: margin, y }, end: { x: margin + 200, y }, thickness: 1.5, color: navy });
-  y -= 18;
+  // Fill printed name
+  try {
+    const nameField = form.getTextField('printed_name');
+    nameField.setText(name);
+  } catch (e) { console.warn('Name field not found:', e); }
 
-  // Acknowledgement paragraphs
-  const paragraphs = [
-    'I have received a copy of the Company\'s Handbook and the applicable Supplement(s) for the locations in which I work. I agree to read it and to comply with the policies and procedures described in the Handbook and Supplement(s). If I have any questions regarding any of the Handbook\'s provisions, I will consult with my supervisor, manager or Human Resources. I understand that if I do not follow the policies and procedures contained herein that I may be subject to disciplinary action, up to and including termination of employment.',
-    'I also understand that this Handbook is the most up-to-date version of the Company\'s policies and procedures and replaces any prior written and oral communications about the subjects contained in it.',
-    'I acknowledge that my employment relationship with the Company is "at-will", meaning that, regardless of anything contained in this Handbook and regardless of any custom or practice, either I or the Company may terminate my employment at any time, for any reason or no reason, with or without cause, and with or without procedural requirements. I understand that no representatives of the Company, other than the CEO in a writing signed by him/her/them, may enter into any agreements, or make any representations, written or oral, to alter my at-will status or otherwise create any contractual obligation between me and the Company.',
-    'I further acknowledge that this handbook and the policies contained herein are not intended to create (and shall not be construed as creating) a contract (express or implied) for employment between the Company and any Teammate and that said policies can be modified by the Company at any time, with or without notice to me, in its sole and absolute discretion.',
-    'By signing below, I acknowledge that I have received and will abide by the Company\'s Handbook and all the policies within it, including those on harassment, discrimination, retaliation, and bringing complaints regarding the same.',
-  ];
+  // Fill date
+  try {
+    const dateField = form.getTextField('date');
+    dateField.setText(date);
+  } catch (e) { console.warn('Date field not found:', e); }
 
-  function wrapText(text, maxWidth, f, size) {
-    const words = text.split(' ');
-    const lines = [];
-    let line = '';
-    for (const word of words) {
-      const test = line ? line + ' ' + word : word;
-      if (f.widthOfTextAtSize(test, size) > maxWidth) {
-        lines.push(line);
-        line = word;
-      } else {
-        line = test;
-      }
-    }
-    if (line) lines.push(line);
-    return lines;
-  }
-
-  for (const para of paragraphs) {
-    const lines = wrapText(para, contentWidth, font, fontSize);
-    for (const line of lines) {
-      page.drawText(line, { x: margin, y, size: fontSize, font, color: black });
-      y -= lineHeight;
-    }
-    y -= 6;
-  }
-
-  // Consent box
-  y -= 4;
-  const consentText = 'By signing electronically, I acknowledge I have received the ADV Teammate Handbook and the applicable State Supplement(s) for the location(s) where I work. I agree to read, understand, and comply with the policies and procedures in both documents, and I understand that failure to do so may result in disciplinary action, up to and including termination. I understand the Handbook is the most up-to-date version of Company policies, and that my employment is at-will unless state law provides otherwise. I understand the State Supplement(s) must be read together with the Handbook and will control where they provide different or more generous provisions. If I have questions, I will contact my supervisor/manager or Human Resources.';
-  const consentLines = wrapText(consentText, contentWidth - 20, font, 8);
-  const boxHeight = consentLines.length * 10 + 16;
-
-  page.drawRectangle({ x: margin, y: y - boxHeight + 8, width: contentWidth, height: boxHeight, color: rgb(0.95, 0.95, 0.95), borderColor: rgb(0.85, 0.85, 0.85), borderWidth: 0.5 });
-
-  // Checkmark
-  page.drawText('[X]', { x: margin + 6, y: y, size: 8, font: fontBold, color: navy });
-  let cy = y;
-  for (const line of consentLines) {
-    page.drawText(line, { x: margin + 22, y: cy, size: 8, font, color: gray });
-    cy -= 10;
-  }
-  y = cy - 16;
-
-  // Printed Name
-  page.drawText('PRINTED TEAMMATE NAME', { x: margin, y, size: 8, font, color: gray });
-  y -= 16;
-  page.drawText(name, { x: margin, y, size: 13, font: fontBold, color: black });
-  y -= 8;
-  page.drawLine({ start: { x: margin, y }, end: { x: 400, y }, thickness: 0.5, color: rgb(0.7,0.7,0.7) });
-  y -= 20;
-
-  // Signature
-  page.drawText('TEAMMATE SIGNATURE', { x: margin, y, size: 8, font, color: gray });
-  y -= 4;
-
+  // Embed signature image onto the page
   try {
     const sigImage = await pdfDoc.embedPng(sigDataUrl);
-    const sigDims = sigImage.scale(0.4);
-    const maxW = 260;
-    const maxH = 60;
+    const sigDims = sigImage.scale(1);
+    // signature_image field rect: x=57, y=603 to x=284, y=634 (PDF coords, origin bottom-left)
+    // PyMuPDF reports top-left origin, so convert: PDF_y = pageHeight - pymu_y
+    const fieldX = 57;
+    const fieldY = pageHeight - 634; // bottom of field in PDF coords
+    const fieldW = 227; // 284 - 57
+    const fieldH = 30;  // 634 - 603
+
     let w = sigDims.width;
     let h = sigDims.height;
-    if (w > maxW) { h = h * (maxW / w); w = maxW; }
-    if (h > maxH) { w = w * (maxH / h); h = maxH; }
-    page.drawImage(sigImage, { x: margin, y: y - h, width: w, height: h });
-    y -= h + 4;
-  } catch (e) {
-    y -= 40;
-  }
+    // Scale to fit within field bounds
+    const scaleW = fieldW / w;
+    const scaleH = fieldH / h;
+    const scale = Math.min(scaleW, scaleH);
+    w = w * scale;
+    h = h * scale;
 
-  page.drawLine({ start: { x: margin, y }, end: { x: 400, y }, thickness: 0.5, color: rgb(0.7,0.7,0.7) });
-  y -= 20;
+    page.drawImage(sigImage, {
+      x: fieldX,
+      y: fieldY,
+      width: w,
+      height: h,
+    });
+  } catch (e) { console.warn('Signature embed failed:', e); }
 
-  // Date
-  page.drawText('DATE', { x: margin, y, size: 8, font, color: gray });
-  y -= 16;
-  page.drawText(date, { x: margin, y, size: 13, font, color: black });
-  y -= 8;
-  page.drawLine({ start: { x: margin, y }, end: { x: 400, y }, thickness: 0.5, color: rgb(0.7,0.7,0.7) });
-
-  // Footer
-  page.drawText('© 2025 Advantage Solutions Inc.  |  Confidential', { x: margin, y: 30, size: 7, font, color: gray });
+  // Flatten form so fields aren't editable
+  form.flatten();
 
   return await pdfDoc.save();
 }
