@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ADV Handbook Acknowledgement</title>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+<style>
+  :root {
+    --navy: #1B2A4A;
+    --navy-light: #2A3F6A;
+    --white: #FFFFFF;
+    --gray-50: #F8F9FA;
+    --gray-100: #F1F3F5;
+    --gray-200: #E9ECEF;
+    --gray-300: #DEE2E6;
+    --gray-400: #ADB5BD;
+    --gray-600: #6C757D;
+    --gray-800: #343A40;
+    --green: #2E7D32;
+    --green-light: #E8F5E9;
+    --red: #C62828;
+    --red-light: #FFEBEE;
+    --font-body: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    --radius: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .header-sub {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  /* ── Main Container ── */
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .card-header {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gray-600);
+    padding: 14px 18px 0;
+  }
+  .card-body { padding: 14px 18px 18px; }
+
+  /* ── Acknowledgement Text ── */
+  .ack-text {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--gray-800);
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 14px 18px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ack-text p { margin-bottom: 12px; }
+  .ack-text p:last-child { margin-bottom: 0; }
+  .scroll-hint {
+    font-size: 11px;
+    color: var(--gray-400);
+    text-align: center;
+    padding: 6px 0 2px;
+  }
+
+  /* ── Consent Checkbox ── */
+  .consent-box {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin: 14px 18px 18px;
+  }
+  .consent-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--gray-800);
+  }
+  .consent-label input[type="checkbox"] {
+    margin-top: 3px;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    accent-color: var(--navy);
+    cursor: pointer;
+  }
+
+  /* ── Form Fields ── */
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--gray-600);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .text-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 16px; /* prevents iOS zoom */
+    font-family: var(--font-body);
+    border: 1.5px solid var(--gray-300);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--gray-800);
+    transition: border-color 0.2s;
+  }
+  .text-input:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(27,42,74,0.1);
+  }
+  .text-input::placeholder { color: var(--gray-400); }
+  .text-input[readonly] {
+    background: var(--gray-100);
+    color: var(--gray-600);
+  }
+
+  /* ── Signature Pad ── */
+  .sig-wrapper {
+    position: relative;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 6px;
+    background: var(--white);
+    overflow: hidden;
+  }
+  .sig-wrapper.active {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(27,42,74,0.1);
+  }
+  #sig-canvas {
+    width: 100%;
+    height: 160px;
+    display: block;
+    touch-action: none;
+  }
+  .sig-line {
+    position: absolute;
+    bottom: 40px;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background: var(--gray-200);
+    pointer-events: none;
+  }
+  .sig-x {
+    position: absolute;
+    bottom: 34px;
+    left: 16px;
+    font-size: 14px;
+    color: var(--gray-300);
+    pointer-events: none;
+    font-style: italic;
+  }
+  .sig-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 6px 8px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+  }
+  .btn-clear {
+    background: none;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--gray-600);
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .btn-clear:active { background: var(--gray-100); }
+
+  /* ── Submit Button ── */
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--font-body);
+    letter-spacing: 0.3px;
+    color: var(--white);
+    background: var(--navy);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .btn-submit:active { background: var(--navy-light); }
+  .btn-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .btn-submit .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .btn-submit.loading .spinner { display: block; }
+  .btn-submit.loading .btn-text { display: none; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Success Screen ── */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .success-screen.show { display: block; }
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: scaleIn 0.4s ease;
+  }
+  .success-icon svg { width: 36px; height: 36px; color: var(--green); }
+  .success-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+  }
+  .success-detail {
+    font-size: 14px;
+    color: var(--gray-600);
+    margin-bottom: 32px;
+  }
+  .btn-reset {
+    display: inline-block;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--navy);
+    background: var(--white);
+    border: 2px solid var(--navy);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-reset:active { background: var(--gray-100); }
+
+  @keyframes scaleIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── Error Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 16px;
+    right: 16px;
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--red);
+    color: var(--white);
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    box-shadow: var(--shadow-md);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 200;
+  }
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--gray-400);
+    padding: 8px 16px 24px;
+  }
+
+  /* ── Form hidden state ── */
+  .form-area.hidden { display: none; }
+
+  /* ── Config Panel ── */
+  .config-toggle {
+    font-size: 11px;
+    color: var(--gray-400);
+    cursor: pointer;
+    text-align: center;
+    padding: 4px;
+    margin-bottom: 16px;
+  }
+  .config-panel {
+    display: none;
+    padding: 14px 18px;
+  }
+  .config-panel.show { display: block; }
+  .config-panel .text-input {
+    font-size: 13px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .config-note {
+    font-size: 11px;
+    color: var(--gray-400);
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-title">ADV Teammate Handbook</div>
+  <div class="header-sub">Acknowledgement of Receipt &nbsp;|&nbsp; Revised February 2025</div>
+</div>
+
+<!-- Form Area -->
+<div class="container form-area" id="formArea">
+
+  <!-- Acknowledgement Text -->
+  <div class="card">
+    <div class="card-header">Acknowledgement of Receipt</div>
+    <div class="ack-text" id="ackScroll">
+      <p>I have received a copy of the Company's Handbook and the applicable Supplement(s) for the locations in which I work. I agree to read it and to comply with the policies and procedures described in the Handbook and Supplement(s). If I have any questions regarding any of the Handbook's provisions, I will consult with my supervisor, manager or Human Resources. I understand that if I do not follow the policies and procedures contained herein that I may be subject to disciplinary action, up to and including termination of employment.</p>
+      <p>I also understand that this Handbook is the most up-to-date version of the Company's policies and procedures and replaces any prior written and oral communications about the subjects contained in it.</p>
+      <p>I acknowledge that my employment relationship with the Company is "at-will", meaning that, regardless of anything contained in this Handbook and regardless of any custom or practice, either I or the Company may terminate my employment at any time, for any reason or no reason, with or without cause, and with or without procedural requirements. I understand that no representatives of the Company, other than the CEO in a writing signed by him/her/them, may enter into any agreements, or make any representations, written or oral, to alter my at-will status or otherwise create any contractual obligation between me and the Company.</p>
+      <p>I further acknowledge that this handbook and the policies contained herein are not intended to create (and shall not be construed as creating) a contract (express or implied) for employment between the Company and any Teammate and that said policies can be modified by the Company at any time, with or without notice to me, in its sole and absolute discretion.</p>
+      <p>By signing below, I acknowledge that I have received and will abide by the Company's Handbook and all the policies within it, including those on harassment, discrimination, retaliation, and bringing complaints regarding the same.</p>
+    </div>
+    <div class="scroll-hint" id="scrollHint">↓ Scroll to read full text</div>
+    <div class="consent-box">
+      <label class="consent-label">
+        <input type="checkbox" id="consentCheck">
+        <span>By signing electronically, I acknowledge I have received the ADV Teammate Handbook and the applicable State Supplement(s) for the location(s) where I work. I agree to read, understand, and comply with the policies and procedures in both documents, and I understand that failure to do so may result in disciplinary action, up to and including termination. I understand the Handbook is the most up-to-date version of Company policies, and that my employment is at-will unless state law provides otherwise. I understand the State Supplement(s) must be read together with the Handbook and will control where they provide different or more generous provisions. If I have questions, I will contact my supervisor/manager or Human Resources.</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Name -->
+  <div class="card">
+    <div class="card-body">
+      <label class="field-label" for="teammateName">Printed Teammate Name</label>
+      <input type="text" class="text-input" id="teammateName" placeholder="Your Full Name" autocomplete="name" autocapitalize="words" spellcheck="false">
+    </div>
+  </div>
+
+  <!-- Signature -->
+  <div class="card">
+    <div class="card-body">
+      <label class="field-label">Teammate Signature</label>
+      <div class="sig-wrapper" id="sigWrapper">
+        <canvas id="sig-canvas"></canvas>
+        <div class="sig-line"></div>
+        <div class="sig-x">✕</div>
+        <div class="sig-actions">
+          <button type="button" class="btn-clear" id="btnClear">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Date -->
+  <div class="card">
+    <div class="card-body">
+      <label class="field-label" for="signDate">Date</label>
+      <input type="text" class="text-input" id="signDate" readonly>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <button class="btn-submit" id="btnSubmit" disabled>
+    <span class="spinner"></span>
+    <span class="btn-text">Sign & Submit</span>
+  </button>
+
+  <!-- Config -->
+  <div class="config-toggle" id="configToggle">⚙ Server Settings</div>
+  <div class="config-panel" id="configPanel">
+    <label class="field-label">Local Server URL (optional)</label>
+    <input type="url" class="text-input" id="localServerUrl" placeholder="https://acknowledgements.yourdomain.com/upload">
+    <div class="config-note">If set, signed PDFs will also be POSTed to this endpoint. Leave blank to use email delivery only.</div>
+  </div>
+
+  <div class="footer">© 2025 Advantage Solutions Inc. | Confidential</div>
+</div>
+
+<!-- Success Screen -->
+<div class="container success-screen" id="successScreen">
+  <div class="success-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <div class="success-title">Acknowledgement Submitted</div>
+  <div class="success-detail" id="successDetail"></div>
+  <button class="btn-reset" id="btnReset">Sign Another</button>
+</div>
+
+<!-- Error Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+
+
+// ═══════════════════════════════════════════════
+// DOM REFS
+// ═══════════════════════════════════════════════
+const formArea = document.getElementById('formArea');
+const successScreen = document.getElementById('successScreen');
+const successDetail = document.getElementById('successDetail');
+const consentCheck = document.getElementById('consentCheck');
+const teammateName = document.getElementById('teammateName');
+const signDate = document.getElementById('signDate');
+const sigCanvas = document.getElementById('sig-canvas');
+const sigWrapper = document.getElementById('sigWrapper');
+const btnClear = document.getElementById('btnClear');
+const btnSubmit = document.getElementById('btnSubmit');
+const btnReset = document.getElementById('btnReset');
+const toast = document.getElementById('toast');
+const scrollHint = document.getElementById('scrollHint');
+const ackScroll = document.getElementById('ackScroll');
+const configToggle = document.getElementById('configToggle');
+const configPanel = document.getElementById('configPanel');
+const localServerUrl = document.getElementById('localServerUrl');
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+
+// Date
+const today = new Date();
+const dateStr = String(today.getMonth()+1).padStart(2,'0') + '/' +
+                String(today.getDate()).padStart(2,'0') + '/' +
+                today.getFullYear();
+signDate.value = dateStr;
+
+// Signature Pad
+const signaturePad = new SignaturePad(sigCanvas, {
+  backgroundColor: 'rgb(255,255,255)',
+  penColor: '#1B2A4A',
+  minWidth: 1.5,
+  maxWidth: 3,
+});
+
+function resizeCanvas() {
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  const rect = sigCanvas.getBoundingClientRect();
+  sigCanvas.width = rect.width * ratio;
+  sigCanvas.height = rect.height * ratio;
+  sigCanvas.getContext('2d').scale(ratio, ratio);
+  signaturePad.clear();
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Signature pad focus styling
+sigCanvas.addEventListener('pointerdown', () => sigWrapper.classList.add('active'));
+sigCanvas.addEventListener('pointerup', () => sigWrapper.classList.remove('active'));
+
+// Clear button
+btnClear.addEventListener('click', () => {
+  signaturePad.clear();
+  validateForm();
+});
+
+// Scroll hint
+ackScroll.addEventListener('scroll', () => {
+  if (ackScroll.scrollTop + ackScroll.clientHeight >= ackScroll.scrollHeight - 10) {
+    scrollHint.style.display = 'none';
+  }
+});
+
+// Config panel
+configToggle.addEventListener('click', () => {
+  configPanel.classList.toggle('show');
+});
+
+// Load saved server URL (default to production endpoint)
+const defaultUrl = 'https://upload.the-dump-bin.com/upload';
+const savedUrl = localStorage.getItem('localServerUrl') || defaultUrl;
+localServerUrl.value = savedUrl;
+localServerUrl.addEventListener('input', () => {
+  localStorage.setItem('localServerUrl', localServerUrl.value);
+});
+
+// ═══════════════════════════════════════════════
+// FORM VALIDATION
+// ═══════════════════════════════════════════════
+function validateForm() {
+  const valid = consentCheck.checked &&
+                teammateName.value.trim().length > 0 &&
+                !signaturePad.isEmpty();
+  btnSubmit.disabled = !valid;
+  return valid;
+}
+
+consentCheck.addEventListener('change', validateForm);
+teammateName.addEventListener('input', validateForm);
+sigCanvas.addEventListener('pointerup', () => setTimeout(validateForm, 50));
+
+// ═══════════════════════════════════════════════
+// PDF GENERATION
+// ═══════════════════════════════════════════════
+async function generatePDF(name, sigDataUrl, date) {
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([612, 792]); // US Letter
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const fontSize = 9.5;
+  const lineHeight = 13;
+  const margin = 60;
+  const contentWidth = 612 - margin * 2;
+  let y = 740;
+
+  const navy = rgb(0.106, 0.165, 0.290);
+  const black = rgb(0, 0, 0);
+  const gray = rgb(0.4, 0.4, 0.4);
+
+  // Header background
+  page.drawRectangle({ x: 0, y: 742, width: 612, height: 50, color: navy });
+  page.drawText('ADV Teammate Handbook', { x: margin, y: 762, size: 14, font: fontBold, color: rgb(1,1,1) });
+  page.drawText('Acknowledgement of Receipt  |  Revised February 2025', { x: margin, y: 750, size: 8, font, color: rgb(0.75,0.75,0.75) });
+
+  // Title
+  y = 720;
+  page.drawText('Acknowledgement of Receipt', { x: margin, y, size: 14, font: fontBold, color: navy });
+  y -= 6;
+  page.drawLine({ start: { x: margin, y }, end: { x: margin + 200, y }, thickness: 1.5, color: navy });
+  y -= 18;
+
+  // Acknowledgement paragraphs
+  const paragraphs = [
+    'I have received a copy of the Company\'s Handbook and the applicable Supplement(s) for the locations in which I work. I agree to read it and to comply with the policies and procedures described in the Handbook and Supplement(s). If I have any questions regarding any of the Handbook\'s provisions, I will consult with my supervisor, manager or Human Resources. I understand that if I do not follow the policies and procedures contained herein that I may be subject to disciplinary action, up to and including termination of employment.',
+    'I also understand that this Handbook is the most up-to-date version of the Company\'s policies and procedures and replaces any prior written and oral communications about the subjects contained in it.',
+    'I acknowledge that my employment relationship with the Company is "at-will", meaning that, regardless of anything contained in this Handbook and regardless of any custom or practice, either I or the Company may terminate my employment at any time, for any reason or no reason, with or without cause, and with or without procedural requirements. I understand that no representatives of the Company, other than the CEO in a writing signed by him/her/them, may enter into any agreements, or make any representations, written or oral, to alter my at-will status or otherwise create any contractual obligation between me and the Company.',
+    'I further acknowledge that this handbook and the policies contained herein are not intended to create (and shall not be construed as creating) a contract (express or implied) for employment between the Company and any Teammate and that said policies can be modified by the Company at any time, with or without notice to me, in its sole and absolute discretion.',
+    'By signing below, I acknowledge that I have received and will abide by the Company\'s Handbook and all the policies within it, including those on harassment, discrimination, retaliation, and bringing complaints regarding the same.',
+  ];
+
+  function wrapText(text, maxWidth, f, size) {
+    const words = text.split(' ');
+    const lines = [];
+    let line = '';
+    for (const word of words) {
+      const test = line ? line + ' ' + word : word;
+      if (f.widthOfTextAtSize(test, size) > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  for (const para of paragraphs) {
+    const lines = wrapText(para, contentWidth, font, fontSize);
+    for (const line of lines) {
+      page.drawText(line, { x: margin, y, size: fontSize, font, color: black });
+      y -= lineHeight;
+    }
+    y -= 6;
+  }
+
+  // Consent box
+  y -= 4;
+  const consentText = 'By signing electronically, I acknowledge I have received the ADV Teammate Handbook and the applicable State Supplement(s) for the location(s) where I work. I agree to read, understand, and comply with the policies and procedures in both documents, and I understand that failure to do so may result in disciplinary action, up to and including termination. I understand the Handbook is the most up-to-date version of Company policies, and that my employment is at-will unless state law provides otherwise. I understand the State Supplement(s) must be read together with the Handbook and will control where they provide different or more generous provisions. If I have questions, I will contact my supervisor/manager or Human Resources.';
+  const consentLines = wrapText(consentText, contentWidth - 20, font, 8);
+  const boxHeight = consentLines.length * 10 + 16;
+
+  page.drawRectangle({ x: margin, y: y - boxHeight + 8, width: contentWidth, height: boxHeight, color: rgb(0.95, 0.95, 0.95), borderColor: rgb(0.85, 0.85, 0.85), borderWidth: 0.5 });
+
+  // Checkmark
+  page.drawText('☑', { x: margin + 6, y: y, size: 10, font, color: navy });
+  let cy = y;
+  for (const line of consentLines) {
+    page.drawText(line, { x: margin + 22, y: cy, size: 8, font, color: gray });
+    cy -= 10;
+  }
+  y = cy - 16;
+
+  // Printed Name
+  page.drawText('PRINTED TEAMMATE NAME', { x: margin, y, size: 8, font, color: gray });
+  y -= 16;
+  page.drawText(name, { x: margin, y, size: 13, font: fontBold, color: black });
+  y -= 8;
+  page.drawLine({ start: { x: margin, y }, end: { x: 400, y }, thickness: 0.5, color: rgb(0.7,0.7,0.7) });
+  y -= 20;
+
+  // Signature
+  page.drawText('TEAMMATE SIGNATURE', { x: margin, y, size: 8, font, color: gray });
+  y -= 4;
+
+  try {
+    const sigImage = await pdfDoc.embedPng(sigDataUrl);
+    const sigDims = sigImage.scale(0.4);
+    const maxW = 260;
+    const maxH = 60;
+    let w = sigDims.width;
+    let h = sigDims.height;
+    if (w > maxW) { h = h * (maxW / w); w = maxW; }
+    if (h > maxH) { w = w * (maxH / h); h = maxH; }
+    page.drawImage(sigImage, { x: margin, y: y - h, width: w, height: h });
+    y -= h + 4;
+  } catch (e) {
+    y -= 40;
+  }
+
+  page.drawLine({ start: { x: margin, y }, end: { x: 400, y }, thickness: 0.5, color: rgb(0.7,0.7,0.7) });
+  y -= 20;
+
+  // Date
+  page.drawText('DATE', { x: margin, y, size: 8, font, color: gray });
+  y -= 16;
+  page.drawText(date, { x: margin, y, size: 13, font, color: black });
+  y -= 8;
+  page.drawLine({ start: { x: margin, y }, end: { x: 400, y }, thickness: 0.5, color: rgb(0.7,0.7,0.7) });
+
+  // Footer
+  page.drawText('© 2025 Advantage Solutions Inc.  |  Confidential', { x: margin, y: 30, size: 7, font, color: gray });
+
+  return await pdfDoc.save();
+}
+
+// ═══════════════════════════════════════════════
+// FILE NAME HELPER
+// ═══════════════════════════════════════════════
+function buildFilename(fullName, date) {
+  const parts = fullName.trim().split(/\s+/);
+  const last = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+  const first = parts.length > 1 ? parts.slice(0, -1).join('_') : '';
+  const datePart = date.replace(/\//g, '');
+  const namePart = first ? `${last}_${first}` : last;
+  return `${namePart}_Acknowledgement_${datePart}.pdf`;
+}
+
+
+
+// ═══════════════════════════════════════════════
+// DELIVERY: LOCAL SERVER POST
+// ═══════════════════════════════════════════════
+async function postToLocal(pdfBytes, filename, fullName, date) {
+  const url = localServerUrl.value.trim();
+  if (!url) return null;
+
+  try {
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const formData = new FormData();
+    formData.append('file', blob, filename);
+    formData.append('filename', filename);
+    formData.append('teammate_name', fullName);
+    formData.append('date_signed', date);
+
+    const resp = await fetch(url, { method: 'POST', body: formData });
+    if (!resp.ok) throw new Error(`Server responded ${resp.status}`);
+    return 'server';
+  } catch (e) {
+    console.warn('Local server POST failed:', e.message);
+    return null;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// FALLBACK: BROWSER DOWNLOAD
+// ═══════════════════════════════════════════════
+function downloadPDF(pdfBytes, filename) {
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg, duration = 4000) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+// ═══════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════
+btnSubmit.addEventListener('click', async () => {
+  if (!validateForm()) return;
+
+  btnSubmit.classList.add('loading');
+  btnSubmit.disabled = true;
+
+  try {
+    const fullName = teammateName.value.trim();
+    const date = signDate.value;
+    const sigDataUrl = signaturePad.toDataURL('image/png');
+    const filename = buildFilename(fullName, date);
+
+    // Generate PDF
+    const pdfBytes = await generatePDF(fullName, sigDataUrl, date);
+
+    // Attempt local server delivery
+    const serverResult = await postToLocal(pdfBytes, filename, fullName, date);
+
+    let detail = `${fullName} — ${date}`;
+    if (serverResult === 'server') {
+      detail += '\nSaved to server.';
+    } else {
+      // Fallback: download to device
+      downloadPDF(pdfBytes, filename);
+      detail += '\nServer unavailable — PDF downloaded to your device.';
+    }
+
+    successDetail.textContent = detail;
+    formArea.classList.add('hidden');
+    successScreen.classList.add('show');
+
+  } catch (e) {
+    console.error('Submission error:', e);
+    showToast('Something went wrong. Please try again.');
+    btnSubmit.classList.remove('loading');
+    btnSubmit.disabled = false;
+  }
+});
+
+// ═══════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════
+btnReset.addEventListener('click', () => {
+  successScreen.classList.remove('show');
+  formArea.classList.remove('hidden');
+  consentCheck.checked = false;
+  teammateName.value = '';
+  signaturePad.clear();
+  scrollHint.style.display = '';
+  btnSubmit.classList.remove('loading');
+  btnSubmit.disabled = true;
+  teammateName.focus();
+});
+</script>
+</body>
+</html>
