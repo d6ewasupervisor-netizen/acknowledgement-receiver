@@ -634,7 +634,7 @@ async function generatePDF(name, sigDataUrl, date) {
   page.drawRectangle({ x: margin, y: y - boxHeight + 8, width: contentWidth, height: boxHeight, color: rgb(0.95, 0.95, 0.95), borderColor: rgb(0.85, 0.85, 0.85), borderWidth: 0.5 });
 
   // Checkmark
-  page.drawText('☑', { x: margin + 6, y: y, size: 10, font, color: navy });
+  page.drawText('[X]', { x: margin + 6, y: y, size: 8, font: fontBold, color: navy });
   let cy = y;
   for (const line of consentLines) {
     page.drawText(line, { x: margin + 22, y: cy, size: 8, font, color: gray });
